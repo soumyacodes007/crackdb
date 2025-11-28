@@ -33,7 +33,7 @@ graph TD
     classDef storage fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
     classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,stroke-dasharray: 5 5;
 
-    %% 2. Define Nodes & Subgraphs
+    %% 2. Define Nodes and Subgraphs
     subgraph Client_Side [User / Client Application]
         Client(Web App / Agent)
     end
@@ -86,7 +86,7 @@ graph TD
     MathEngine -- "Compute & Rank" --> Controller
     Controller -- "Update Cache" --> Cache
 
-    %% 4. Apply Styles
+    %% 4. Apply Styles (Must be done at the end)
     class Client client;
     class Router,Controller,Validator api;
     class Vectorizer,MathEngine,Cache core;
