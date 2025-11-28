@@ -92,8 +92,6 @@ graph TD
     class Vectorizer,MathEngine,Cache core;
     class DB_Instance,FileSystem storage;
     class Gemini external;
-
-    linkStyle default stroke-width:2px,fill:none,stroke:#333;
 ```
 
 ## Key Features
