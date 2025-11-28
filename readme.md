@@ -96,11 +96,11 @@ graph TD
 
 ## Key Features
 
-- ⚡ Automated Embedding Generation using external embedding providers.
-- 🧠 Semantic Search with Cosine Similarity ranking.
-- 💾 JSON Persistence (`crack_storage.json`) for zero-setup usage.
-- 🏎️ Smart LRU Caching to reduce repeated embedding calls.
-- 🛡️ TypeScript-first with strict typing for maintainability.
+-  Automated Embedding Generation using external embedding providers.
+-  Semantic Search with Cosine Similarity ranking.
+-  JSON Persistence (`crack_storage.json`) for zero-setup usage.
+-  Smart LRU Caching to reduce repeated embedding calls.
+-  TypeScript-first with strict typing for maintainability.
 
 ## Project Structure
 
@@ -188,11 +188,47 @@ Semantic search endpoint.
 
 Retrieve a document by its ID.
 
-## Technical Deep Dive
 
-Cosine similarity is used to rank vectors. See `src/utils/calc.ts` for the implementation.
 
-## Performance Considerations
+#  Technical Deep Dive: Inside CrackDB
 
-- Storage: file-based JSON; loads into RAM on startup for speed.
-- Concurrency: synchronous write locking to protect against corruption during writes.
+This document provides an engineering overview of how **CrackDB** functions under the hood. It explores the mathematical principles, architectural decisions, and trade-offs made during development.
+
+---
+
+## 1. Vector Embeddings & Dimensionality
+
+At its core, CrackDB relies on **Vector Embeddings**. Computers cannot natively understand the semantic meaning of text. To bridge this gap, we use an external model (Google Gemini `text-embedding-004`) to transform text into numbers.
+
+*   **Input:** "The sky is blue."
+*   **Output:** A 768-dimensional array of floating-point numbers: `[0.012, -0.931, 0.442, ...]`.
+
+These numbers represent the text's location in a high-dimensional semantic space. Concepts that are similar (e.g., "King" and "Queen") are located closer together in this space than dissimilar concepts (e.g., "King" and "Blender").
+
+---
+
+## 2. The Math: Cosine Similarity
+
+To find the "nearest neighbor" (the most similar search result), CrackDB does not use keyword matching (like SQL `LIKE` or Regex). Instead, it calculates the **Cosine Similarity** between the Query Vector and every Document Vector in the database.
+
+We use Cosine Similarity over Euclidean Distance because we care about the **angle** of the vectors (the semantic direction), not the magnitude (length).
+
+### The Formula
+$$ \text{similarity} = \cos(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|} = \frac{\sum_{i=1}^{n} A_i B_i}{\sqrt{\sum_{i=1}^{n} A_i^2} \sqrt{\sum_{i=1}^{n} B_i^2}} $$
+
+### The Implementation (`src/utils/calc.ts`)
+The math is manually implemented in pure TypeScript to ensure zero dependencies on heavy math libraries:
+
+```typescript
+export function computeCosine(vecA: number[], vecB: number[]): number {
+    // 1. Calculate Dot Product
+    const dotProduct = vecA.reduce((acc, val, i) => acc + val * vecB[i], 0);
+
+    // 2. Calculate Magnitudes (Euclidean Norm)
+    const magA = Math.sqrt(vecA.reduce((acc, val) => acc + val ** 2, 0));
+    const magB = Math.sqrt(vecB.reduce((acc, val) => acc + val ** 2, 0));
+
+    // 3. Return Cosine Score (0 to 1)
+    return dotProduct / (magA * magB);
+}
+```
