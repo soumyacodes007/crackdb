@@ -26,43 +26,44 @@ CrackDB uses a layered microservice-like structure that separates API handling f
 
 ```mermaid
 graph TD
-    %% Styling
+    %% 1. Define Styles
     classDef client fill:#f9f9f9,stroke:#333,stroke-width:2px;
     classDef api fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
     classDef core fill:#fff3e0,stroke:#e65100,stroke-width:2px;
     classDef storage fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
     classDef external fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,stroke-dasharray: 5 5;
 
+    %% 2. Define Nodes & Subgraphs
     subgraph Client_Side [User / Client Application]
-        Client(Web App / Agent) ::: client
+        Client(Web App / Agent)
     end
 
     subgraph CrackDB_System [CrackDB Microservice]
         direction TB
         
         subgraph API_Layer [API Interface]
-            Router(Express Router) ::: api
-            Controller(Crack Controller) ::: api
-            Validator(Input Validation) ::: api
+            Router(Express Router)
+            Controller(Crack Controller)
+            Validator(Input Validation)
         end
 
         subgraph Core_Engine [Core Engine]
-            Vectorizer(Embedder Service) ::: core
-            MathEngine(Cosine Similarity Algo) ::: core
-            Cache(MemoryBank / LRU Cache) ::: core
+            Vectorizer(Embedder Service)
+            MathEngine(Cosine Similarity Algo)
+            Cache(MemoryBank / LRU Cache)
         end
 
         subgraph Persistence_Layer [Persistence]
-            DB_Instance(DB Manager) ::: storage
-            FileSystem[(JSON Storage)] ::: storage
+            DB_Instance(DB Manager)
+            FileSystem[(JSON Storage)]
         end
     end
 
     subgraph External_Cloud [External APIs]
-        Gemini[Google Gemini API] ::: external
+        Gemini[Google Gemini API]
     end
 
-    %% Flows
+    %% 3. Define Connections
     Client -->|HTTP POST /v1/ingest| Router
     Client -->|HTTP POST /v1/scan| Router
     
@@ -84,6 +85,13 @@ graph TD
     MathEngine -- "Fetch All Vectors" --> DB_Instance
     MathEngine -- "Compute & Rank" --> Controller
     Controller -- "Update Cache" --> Cache
+
+    %% 4. Apply Styles
+    class Client client;
+    class Router,Controller,Validator api;
+    class Vectorizer,MathEngine,Cache core;
+    class DB_Instance,FileSystem storage;
+    class Gemini external;
 
     linkStyle default stroke-width:2px,fill:none,stroke:#333;
 ```
