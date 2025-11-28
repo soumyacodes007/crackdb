@@ -71,22 +71,22 @@ graph TD
     Validator --> Controller
 
     %% Ingestion Flow
-    Controller -- "1. Raw Text" --> Vectorizer
-    Vectorizer -- "2. Get Embeddings" --> Gemini
-    Gemini -- "3. Return Float32 Array" --> Vectorizer
-    Vectorizer -- "4. Vector Data" --> DB_Instance
-    DB_Instance -- "5. Serialize & Write" --> FileSystem
+    Controller -->|1. Raw Text| Vectorizer
+    Vectorizer -->|2. Get Embeddings| Gemini
+    Gemini -->|3. Return Float32 Array| Vectorizer
+    Vectorizer -->|4. Vector Data| DB_Instance
+    DB_Instance -->|5. Serialize & Write| FileSystem
 
     %% Query Flow
-    Controller -- "Check Cache" --> Cache
+    Controller -->|Check Cache| Cache
     Cache -.->|Hit| Controller
-    Cache --|Miss| Vectorizer
-    Controller -- "Query Vector" --> MathEngine
-    MathEngine -- "Fetch All Vectors" --> DB_Instance
-    MathEngine -- "Compute & Rank" --> Controller
-    Controller -- "Update Cache" --> Cache
+    Cache -->|Miss| Vectorizer
+    Controller -->|Query Vector| MathEngine
+    MathEngine -->|Fetch All Vectors| DB_Instance
+    MathEngine -->|Compute & Rank| Controller
+    Controller -->|Update Cache| Cache
 
-    %% 4. Apply Styles (Must be done at the end)
+    %% 4. Apply Styles
     class Client client;
     class Router,Controller,Validator api;
     class Vectorizer,MathEngine,Cache core;
